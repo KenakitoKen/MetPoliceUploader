@@ -1,5 +1,5 @@
 # MetPoliceUploader
-Python script to automate uploading reports to the Met portal
+Python script to automate uploading reports to the Met portal \n
 Currently the script is limited to uploading two videos at a time
 Selenium and python must be installed on the users machine. 
 
