@@ -1,0 +1,335 @@
+#! python3
+# creates report and uploads video to met portal. It does not click on 'submit'--user must manually check the inputs and click submit. 
+import requests, os, bs4, ctypes, os.path, pyautogui, time, openpyxl
+from selenium import webdriver
+from tkinter import messagebox
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from datetime import datetime
+
+wbFilePath = input("Enter the file path to the Excel sheet: ")
+#load the values from the excel spreadsheet into variables
+wb = openpyxl.load_workbook(wbFilePath)
+sheet = wb['Sheet1']
+firstName = sheet['B1'].value
+surname = sheet['B2'].value
+dob = sheet['B3'].value
+dob = dob.strftime("%d/%m/%Y")
+email = sheet['B4'].value
+phoneNumber = sheet['B5'].value
+postcode = sheet['B6'].value
+buildingName = sheet['B7'].value
+buildingNumber = sheet['B8'].value
+street = sheet['B9'].value
+townOrCity = sheet['B10'].value
+typeOfVehicle = sheet['B11'].value
+registrationNumber = sheet['B12'].value
+make = sheet['B13'].value
+model = sheet['B14'].value
+colour = sheet['B15'].value
+dateOfIncident = sheet['B16'].value
+dateOfIncident = dateOfIncident.strftime("%d/%m/%Y")
+hourOfIncident = sheet['B17'].value
+minuteOfIncident = sheet['B18'].value
+descriptionOfIncidentTime = sheet['B19'].value
+descriptionOfLocation = sheet['B20'].value
+weatherConditions = sheet['B21'].value
+lightConditions = sheet['B22'].value
+roadSurfaceConditions = sheet['B23'].value
+incidentDescription = sheet['B24'].value
+roadTrafficOffence = sheet['B25'].value
+filePathVidOne = sheet['B26'].value
+descriptionOfVideoOne = sheet['B27'].value
+filePathVidTwo = sheet['B28'].value
+descriptionOfVideoTwo = sheet['B29'].value
+youInvolvedAs = sheet['B30'].value
+theyInvolvedAs = sheet['B31'].value
+
+#add 1 to hour and minute to make it correct for number of keypresses (it starts at 0)
+hourOfIncident += 1
+minuteOfIncident += 1
+
+#strTheyInvolvedAs will be used to set the car details--the HTML is either 'driver' or 'motorcyclist' so setting it here to make it dynamic
+strTheyInvolvedAs = theyInvolvedAs
+
+#initialise dictionary types. this will be used to select the tight option using keystrokes
+InvolvedAsDict = {'Driver': "", 'Motorcyclist' : "[2]", 'Cyclist' : "[3]", 'Pedestrian' : "[4]"}
+youInvolvedAs = InvolvedAsDict[youInvolvedAs]
+theyInvolvedAs = InvolvedAsDict[theyInvolvedAs]
+
+#initialise dictionary types. this will be used to select the tight option using keystrokes
+weatherConditionsDict = {'Fine with little wind': 1, 'raining or drizzling with little wind': 2, 'snowing with little wind':3,\
+'fine with high winds':4, 'raining or drizzling with high winds':5, 'snowing with high winds':6,\
+'fog or mist' : 7, 'other weather':8, 'I don\'t know':9}
+weatherConditions = weatherConditionsDict[weatherConditions]
+
+#initialise dictionary types. this will be used to select the tight option using keystrokes
+lightConditionsDict = {'Daylight':1, 'Darkness, street lights present and lit':2, 'Darkness, street lights present but unlit':3,\
+'darkness, no street lighting':4, 'darkness, street lighting unknown':5, 'I don\'t know':6}
+lightConditions = lightConditionsDict[lightConditions]
+
+#initialise dictionary types. this will be used to select the tight option using keystrokes
+roadSurfaceConditionsDict={'dry':1, 'wet or damp':2, 'snow':3, 'Frosty or icy':4,\
+'flooded (surface water above 3cm)':5, 'I don\'t know':6}
+roadSurfaceConditions = roadSurfaceConditionsDict[roadSurfaceConditions]
+
+#initialise dictionary types. this will be used to select the tight option using keystrokes
+theirVehicleDict = {'Car':1, 'Taxi or private hire car' : 2, 'Taxi or private hire car' : 3, 'Minibus (8-16)':4, 'Bus or coach (17+)':5, 'Agric Vehicle':6,\
+'Tram or light rail':7, 'goods vehicle under 3.5 tonnes':8, 'Goods vehicle 3.5-7.4 tonnes':9, 'Goods vehicle (unknown weight)':10,\
+'Heavy goods vehicle (7.5 tonnes or more)':11, 'Other vehicle':12, 'I don\'t know':12}
+typeOfVehicle = theirVehicleDict[typeOfVehicle]
+
+drivingOffenceDict = {'Careless or inconsiderate driving': "", 'driving through a red light':"[2]", 'Driving without due care':"[3]",\
+'mobile phone use while driving':"[4]", 'no insurance':"[5]", 'no driving license':"[6]",\
+'not complying with a traffic sign':"[7]", 'speeding':"[8]", 'stopping in the cycle box area':"[9]",\
+'cycling close pass':"[10]"}
+trafficOffenceList = list(roadTrafficOffence.split(","))
+
+browser = webdriver.Firefox()
+browser.maximize_window()
+type(browser)
+browser.get('https://www.met.police.uk/ro/report/rti/rti-a/report-a-road-traffic-incident/')
+
+#this function will check if an image is on the screen
+def imageChecker(image):
+	coordinates = None
+	while coordinates is None:
+		coordinates = pyautogui.locateOnScreen(image + '.PNG')
+		if coordinates is None:
+			print ('image ' + image + ' not on screen, try again')
+			time.sleep(5)
+			#scroll mouse up so the image has a white background
+			pyautogui.click(0, 330)
+			pyautogui.scroll(100)
+			continue
+		else:
+			print ('image ' + image + ' found')
+
+#user manually selects where incident occured
+messagebox.showinfo("Select location", "please select where the incident occured and select OK")
+
+try:
+	linkElem = browser.find_element_by_link_text("I'm fine with cookies")
+	linkElem.click()
+except:
+	print ("I'm fine with cookies did not appear")
+#Click yes after map location inputted
+linkElem = browser.find_element_by_link_text('Yes')
+linkElem.click()
+
+#click no to 'did a vehical collide with someone'
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(.,\'No\')]')))
+linkElem.click()
+
+#click 'a possible driving offence'
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//h3[contains(.,\'A possible driving offence\')]')))
+linkElem.click()
+
+#click less than 10 days ago
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//h3[contains(.,\'Less than 10 days ago\')]')))
+linkElem.click()
+
+#click yes to video footage
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//h3[contains(.,\'Yes\')]')))
+linkElem.click()
+
+#click start
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(text(),\'Start\')]')))
+linkElem.click()
+
+#mark the chexkbox with check
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[5]/div/fieldset/div[3]/label/span')))
+linkElem.click()
+
+#click next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@name=\'next\']')))
+linkElem.click()
+
+#enter first name
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-FirstNameTextBox\']')))
+linkElem.send_keys(firstName)
+
+#enter second name
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-SurnameTextBox\']')))
+linkElem.send_keys(surname)
+
+#enter DOB
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-DateOfBirthDate\']')))
+linkElem.send_keys(dob)
+
+#enter email address
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-EmailAddressTextBox\']')))
+linkElem.send_keys(email)
+
+#enter phone number
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PhoneNumberTextBox\']')))
+linkElem.send_keys(phoneNumber)
+
+#enter postcode
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_postcode_search\']')))
+linkElem.send_keys(postcode)
+
+#click enter address manually
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(text(),\'Enter address manually\')]')))
+linkElem.click()
+
+#enter building name
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_buildingName\']')))
+linkElem.send_keys(buildingName)
+
+#enter building number
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_buildingNumber\']')))
+linkElem.send_keys(buildingNumber)
+
+#enter street
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_street\']')))
+linkElem.send_keys(street)
+
+#enter city
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_city\']')))
+linkElem.send_keys(townOrCity)
+
+# click next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem.click()
+
+# select what I was involved as
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[4]/div/fieldset/div/fieldset/div'+ youInvolvedAs + '/label/span')))
+linkElem.click()
+
+#select next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@name=\'next\']')))
+linkElem.click()
+
+#select how they were involved															
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[7]/div/fieldset/div[2]/div/fieldset/div' + theyInvolvedAs + '/label/span')))
+linkElem.click()
+ 
+#ketstrokes to click on top of browser,and then select car in drop down
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'],interval=1); pyautogui.press(['down'], presses = typeOfVehicle, interval=1)
+
+#enter car reg number
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-RegistrationNumberTextBox\']')))
+linkElem.send_keys(registrationNumber)
+
+#enter car make
+if make is not None:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-MakeTextBox\']')))
+	linkElem.send_keys(make)
+
+#enter car model
+if model is not None:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-ModelTextBox\']')))
+	linkElem.send_keys(model)
+
+#enter car colour
+if colour is not None:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-MotorcycleColourTextBox\']')))
+	linkElem.send_keys(colour)
+
+#select next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem.click()
+
+#enter date of incident
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-IncidentDateDate\']')))
+linkElem.send_keys(dateOfIncident)
+
+#keystrokes to select hour of incident
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'tab'], interval=1); pyautogui.press(['down'], presses = hourOfIncident, interval=.5)
+
+#keystrokes to select minute of incident
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = minuteOfIncident, interval=.5)
+
+#enter description of time of incident
+if descriptionOfIncidentTime is not None or descriptionOfIncidentTime != '':
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-TimePickerElementGroup-IfYoureUnsureTextBox\']')))
+	linkElem.send_keys(descriptionOfIncidentTime)
+
+#desribing incident location here
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-PleaseProvideAnyTextBox\']')))
+linkElem.send_keys(descriptionOfLocation)
+
+#ketstrokes to set weather conditoins
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = weatherConditions, interval=1)
+
+#keystrokes to set light conditions
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = lightConditions, interval=1)
+
+#keystrokes to set road surface condtions
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = roadSurfaceConditions, interval=1)
+
+#describing incident description here
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-IncidentVanNotStoppingTextBox\']')))
+linkElem.send_keys(incidentDescription)
+
+#loop to select all traffic offences that apply:
+for offence in trafficOffenceList:
+	htmlOffence = drivingOffenceDict[offence]
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[9]/fieldset/div' + htmlOffence + '/label/span')))
+	linkElem.click()
+
+#loop to click on cycling close pass twice--this will ensure cursor is at correct place for next step and keep the options selected as what user selected
+i = 1 
+while i < 3:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[9]/fieldset/div[10]/label/span')))
+	linkElem.click()
+	time.sleep(.5)
+	i += 1
+
+#keystrokes to upload evidence now
+time.sleep(5); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'down'], interval=1)
+
+counter = 1 
+while counter < 3:
+	#enyter file path of first video
+	if counter == 1:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@type=\'file\']')))
+	else:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '(//input[@type=\'file\'])[' + str(counter) + ']')))
+	linkElem.send_keys(filePathVidOne); 
+	
+	#click upload
+	if counter == 1:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-UploadOnline-uploader\']/div[4]/ul/li/div[3]/button[2]')))
+	else:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-UploadOnline_' + str(counter-1) + '-uploader\']/div[4]/ul/li/div[3]/button[2]')))
+	linkElem.click()
+
+	#call function to check image is on screen, passing the green logo image 
+	imageChecker('uploadComplete')
+
+	#type in description of incident fieldset/div
+	if counter == 1:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-PleaseGiveUsADescriptionOfWhatCanBeSeenInYourEvidence:\']')))
+	else:
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-PleaseGiveUsADescriptionOfWhatCanBeSeenInYourEvidence:_' + str(counter-1) + '\']')))
+	linkElem.send_keys(descriptionOfVideoOne); 
+
+	#keystrokes to say video has not been edited
+	time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'down', 'down'], interval=1)
+	
+	if counter == 1:
+		#click add another file
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[11]/div/fieldset/div[5]/div/fieldset/p/input')))
+		linkElem.click()
+	filePathVidOne = filePathVidTwo
+	counter += 1
+
+#keystrokes to say met police can share video with insureres
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'tab', 'down'], interval=1)
+
+#click next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem.click()
+
+#click 'no' do did anyone witness incident question
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[9]/fieldset/div[2]/label/span')))
+linkElem.click()
+
+#click next
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem.click()
+
+print ('Upload complete, please verify details')
