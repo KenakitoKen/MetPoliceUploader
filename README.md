@@ -12,3 +12,5 @@ Selenium and python must be installed on the users machine.
 3) The script cannot enter the location of the incident. The script will show a pop-up and ask the user to enter the location. The user then needs to press 'OK' on the Python pop up.
 
 4) the user must verify what the script has entered before clicking submit. the script will not click 'submit' on behald of the user. 
+
+5) Video of script working here: https://youtu.be/0CdO1bIeoak 
