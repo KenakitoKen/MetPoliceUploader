@@ -15,7 +15,8 @@ sheet = wb['Sheet1']
 firstName = sheet['B1'].value
 surname = sheet['B2'].value
 dob = sheet['B3'].value
-dob = dob.strftime("%d/%m/%Y")
+#dob = dob.strftime("%d.%m.%Y")
+day, month, year = dob.split('.')
 email = sheet['B4'].value
 phoneNumber = sheet['B5'].value
 postcode = sheet['B6'].value
@@ -29,7 +30,8 @@ make = sheet['B13'].value
 model = sheet['B14'].value
 colour = sheet['B15'].value
 dateOfIncident = sheet['B16'].value
-dateOfIncident = dateOfIncident.strftime("%d/%m/%Y")
+#dateOfIncident = dateOfIncident.strftime("%d/%m/%Y")
+day, month, year = dateOfIncident.split('.')
 hourOfIncident = sheet['B17'].value
 minuteOfIncident = sheet['B18'].value
 descriptionOfIncidentTime = sheet['B19'].value
@@ -111,6 +113,8 @@ messagebox.showinfo("Select location", "please select where the incident occured
 
 try:
 	linkElem = browser.find_element_by_link_text("I'm fine with cookies")
+	#linkElem = browser.find_element(By.link_text, "I'm fine with cookies")
+    #linkElem = browser.find_element(By.link.text, "I'm fine with cookies")
 	linkElem.click()
 except:
 	print ("I'm fine with cookies did not appear")
@@ -139,101 +143,127 @@ linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.X
 linkElem.click()
 
 #mark the chexkbox with check
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[5]/div/fieldset/div[3]/label/span')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[5]/div/fieldset/div[3]/label/span')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/div/label')))
 linkElem.click()
 
 #click next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@name=\'next\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//button[@name=\'__target-step-id\']')))
 linkElem.click()
 
 #enter first name
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-FirstNameTextBox\']')))
+# linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-FirstNameTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH,'//div[3]/div/div/input')))
 linkElem.send_keys(firstName)
 
 #enter second name
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-SurnameTextBox\']')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-SurnameTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[4]/div/div/input')))
 linkElem.send_keys(surname)
 
-#enter DOB
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-DateOfBirthDate\']')))
-linkElem.send_keys(dob)
+#enter day of birth
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span/input')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-DateOfBirthDate\']')))
+linkElem.send_keys(day)
+
+#enter month of birth
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[2]/input')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-DateOfBirthDate\']')))
+linkElem.send_keys(month)
+
+#enter year of birth
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[3]/input')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-DateOfBirthDate\']')))
+linkElem.send_keys(year)
 
 #enter email address
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-EmailAddressTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[6]/div/div/input')))
 linkElem.send_keys(email)
 
 #enter phone number
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PhoneNumberTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[7]/div/div/input')))
 linkElem.send_keys(phoneNumber)
 
 #enter postcode
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_postcode_search\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//fieldset/div/input')))
 linkElem.send_keys(postcode)
 
 #click enter address manually
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//a[contains(text(),\'Enter address manually\')]')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/button')))
 linkElem.click()
 
 #enter building name
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_buildingName\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//fieldset/div/div/fieldset/div/div/div/input')))
 linkElem.send_keys(buildingName)
 
 #enter building number
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_buildingNumber\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//fieldset/div/div/fieldset/div[2]/div/div/input')))
 linkElem.send_keys(buildingNumber)
 
 #enter street
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_street\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/fieldset/div[2]/div/div/input')))
 linkElem.send_keys(street)
 
 #enter city
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'YourDetailsWithoutGenderElementGroup-PostcodeAddressLookUp_city\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/fieldset/div[3]/div/div/input')))
 linkElem.send_keys(townOrCity)
 
 # click next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/button')))
 linkElem.click()
 
 # select what I was involved as
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[4]/div/fieldset/div/fieldset/div'+ youInvolvedAs + '/label/span')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/label')))
 linkElem.click()
 
 #select next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@name=\'next\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/button')))
 linkElem.click()
 
+#the following checks if 'remove person involved' link exists--if it doesn, page has loaded 
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//button[2]')))
+
 #select how they were involved															
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[7]/div/fieldset/div[2]/div/fieldset/div' + theyInvolvedAs + '/label/span')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//fieldset/div/label')))
 linkElem.click()
  
 #ketstrokes to click on top of browser,and then select car in drop down
 time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'],interval=1); pyautogui.press(['down'], presses = typeOfVehicle, interval=1)
 
 #enter car reg number
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-RegistrationNumberTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[4]/div/div/input')))
 linkElem.send_keys(registrationNumber)
 
 #enter car make
 if make is not None:
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-MakeTextBox\']')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[5]/div/div/input')))
 	linkElem.send_keys(make)
 
 #enter car model
 if model is not None:
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-ModelTextBox\']')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[6]/div/div/input')))
 	linkElem.send_keys(model)
 
 #enter car colour
 if colour is not None:
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'OtherPeopleRepeatingGroup-' + strTheyInvolvedAs + 'DetailsElementGroup-MotorcycleColourTextBox\']')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[7]/div/div/input')))
 	linkElem.send_keys(colour)
 
 #select next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/button')))
 linkElem.click()
 
-#enter date of incident
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-IncidentDateDate\']')))
+#enter day of incident
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-IncidentDateDate\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span/input')))
+linkElem.send_keys(dateOfIncident)
+
+#enter month of incident
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[2]/input')))
+linkElem.send_keys(dateOfIncident)
+
+#enter year of incident
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[3]/input')))
 linkElem.send_keys(dateOfIncident)
 
 #keystrokes to select hour of incident
@@ -244,11 +274,11 @@ time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=
 
 #enter description of time of incident
 if descriptionOfIncidentTime is not None or descriptionOfIncidentTime != '':
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-TimePickerElementGroup-IfYoureUnsureTextBox\']')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/div/div/input')))
 	linkElem.send_keys(descriptionOfIncidentTime)
 
 #desribing incident location here
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-PleaseProvideAnyTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea')))
 linkElem.send_keys(descriptionOfLocation)
 
 #ketstrokes to set weather conditoins
@@ -261,25 +291,30 @@ time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=
 time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = roadSurfaceConditions, interval=1)
 
 #describing incident description here
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-IncidentVanNotStoppingTextBox\']')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[7]/div/div/textarea')))
 linkElem.send_keys(incidentDescription)
 
 #loop to select all traffic offences that apply:
 for offence in trafficOffenceList:
 	htmlOffence = drivingOffenceDict[offence]
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[9]/fieldset/div' + htmlOffence + '/label/span')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div' + htmlOffence + '/label')))
+#linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[9]/fieldset/div' + htmlOffence + '/label/span')))
 	linkElem.click()
 
 #loop to click on cycling close pass twice--this will ensure cursor is at correct place for next step and keep the options selected as what user selected
 i = 1 
 while i < 3:
-	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[9]/fieldset/div[10]/label/span')))
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/label')))
 	linkElem.click()
 	time.sleep(.5)
 	i += 1
 
 #keystrokes to upload evidence now
-time.sleep(5); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'down'], interval=1)
+#time.sleep(5); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'down'], interval=1)
+
+#Select upload video evidence now
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//option[@value=\'Upload my evidence now\']')))
+linkElem.click()
 
 counter = 1 
 while counter < 3:
@@ -292,7 +327,7 @@ while counter < 3:
 	
 	#click upload
 	if counter == 1:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-UploadOnline-uploader\']/div[4]/ul/li/div[3]/button[2]')))
+		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/button[2]')))
 	else:
 		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-UploadOnline_' + str(counter-1) + '-uploader\']/div[4]/ul/li/div[3]/button[2]')))
 	linkElem.click()
