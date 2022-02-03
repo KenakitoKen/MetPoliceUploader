@@ -31,7 +31,7 @@ model = sheet['B14'].value
 colour = sheet['B15'].value
 dateOfIncident = sheet['B16'].value
 #dateOfIncident = dateOfIncident.strftime("%d/%m/%Y")
-day, month, year = dateOfIncident.split('.')
+dayofInc, monthOfInc, yearOfInc = dateOfIncident.split('.')
 hourOfIncident = sheet['B17'].value
 minuteOfIncident = sheet['B18'].value
 descriptionOfIncidentTime = sheet['B19'].value
@@ -97,7 +97,7 @@ browser.get('https://www.met.police.uk/ro/report/rti/rti-a/report-a-road-traffic
 def imageChecker(image):
 	coordinates = None
 	while coordinates is None:
-		coordinates = pyautogui.locateOnScreen(image + '.PNG')
+		coordinates = pyautogui.locateOnScreen(r'C:\Users\Ken\Documents\Python\MetPolice\\' + image + '.PNG')
 		if coordinates is None:
 			print ('image ' + image + ' not on screen, try again')
 			time.sleep(5)
@@ -256,18 +256,18 @@ linkElem.click()
 #enter day of incident
 #linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@id=\'IncidentDetailsElementGroup-IncidentDateDate\']')))
 linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span/input')))
-linkElem.send_keys(dateOfIncident)
+linkElem.send_keys(dayofInc)
 
 #enter month of incident
 linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[2]/input')))
-linkElem.send_keys(dateOfIncident)
+linkElem.send_keys(monthOfInc)
 
 #enter year of incident
 linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//span[3]/input')))
-linkElem.send_keys(dateOfIncident)
+linkElem.send_keys(yearOfInc)
 
 #keystrokes to select hour of incident
-time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'tab'], interval=1); pyautogui.press(['down'], presses = hourOfIncident, interval=.5)
+time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = hourOfIncident, interval=.5)
 
 #keystrokes to select minute of incident
 time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab'], interval=1); pyautogui.press(['down'], presses = minuteOfIncident, interval=.5)
@@ -317,54 +317,58 @@ linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.X
 linkElem.click()
 
 counter = 1 
-while counter < 3:
+while counter < 2:
 	#enyter file path of first video
-	if counter == 1:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@type=\'file\']')))
-	else:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '(//input[@type=\'file\'])[' + str(counter) + ']')))
+	# if counter == 1:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@type=\'file\']')))
+	# else:
+		# #linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '(//input[@type=\'file\'])[' + str(counter) + ']')))
+		# linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//input[@type=\'file\']')))
 	linkElem.send_keys(filePathVidOne); 
 	
 	#click upload
-	if counter == 1:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/button[2]')))
-	else:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-UploadOnline_' + str(counter-1) + '-uploader\']/div[4]/ul/li/div[3]/button[2]')))
+	#if counter == 1:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/button[2]')))
+	#else:
+	#	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/button[2]')))
 	linkElem.click()
 
 	#call function to check image is on screen, passing the green logo image 
 	imageChecker('uploadComplete')
 
-	#type in description of incident fieldset/div
-	if counter == 1:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-PleaseGiveUsADescriptionOfWhatCanBeSeenInYourEvidence:\']')))
-	else:
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//textarea[@id=\'IncidentDetailsContElementGroup-EvidenceElementGroupB-UploadOnlineRepeatingGroup-PleaseGiveUsADescriptionOfWhatCanBeSeenInYourEvidence:_' + str(counter-1) + '\']')))
+	#type in description of incident fieldset/div. new webpage domx is here is not as consistent--can't use counter 
+	#if counter == 1:
+	linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/div/div/textarea')))
+	#else:
+		# linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/fieldset/div[2]/div[3]/div/div/textarea')))
 	linkElem.send_keys(descriptionOfVideoOne); 
 
 	#keystrokes to say video has not been edited
 	time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'down', 'down'], interval=1)
 	
-	if counter == 1:
-		#click add another file
-		linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[8]/div/fieldset/div[11]/div/fieldset/div[5]/div/fieldset/p/input')))
-		linkElem.click()
-	filePathVidOne = filePathVidTwo
+	# if counter == 1:
+		# #click add another file
+		# linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[5]/div/button')))
+		# linkElem.click()
+	# filePathVidOne = filePathVidTwo
 	counter += 1
 
 #keystrokes to say met police can share video with insureres
 time.sleep(2); pyautogui.click((910, 0)); pyautogui.typewrite(['tab', 'tab', 'down'], interval=1)
 
 #click next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/button')))
 linkElem.click()
 
+#wait for 'incident details' link to become visible
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//li[5]/button')))
+
 #click 'no' do did anyone witness incident question
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/div[9]/fieldset/div[2]/label/span')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[2]/label')))
 linkElem.click()
 
 #click next
-linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[@id=\'form-app\']/section/input[9]')))
+linkElem = WebDriverWait(browser, 10).until(EC.presence_of_element_located((By.XPATH, '//div[3]/button')))
 linkElem.click()
 
 print ('Upload complete, please verify details')
