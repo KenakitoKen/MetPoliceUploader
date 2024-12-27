@@ -1,5 +1,7 @@
 #! python3
-# creates report and uploads video to met portal. It does not click on 'submit'--user must manually check the inputs and click submit. 
+# creates report and uploads video to met portal. It does not click on 'submit'--. 
+# The MET state that the user is committing a crime if they intentionally upload incorrect information, 
+# therefore, the script WILL NOT click 'SUBMIT', but the user must manually check the details are correct.  
 import requests, os, bs4, ctypes, os.path, pyautogui, time, openpyxl
 from selenium import webdriver
 from tkinter import messagebox
